@@ -1,31 +1,31 @@
 const ChessPiece = require('./chesspiece')
 const Square = require('./square')
 // when indexing, remember: [y][x]. 
+/**
+ * If the player color is black, make sure to invert the board.
+ */
 
-
-const to2D = {
-    105:0, 195:1, 285: 2, 375: 3, 465: 4, 555: 5, 645: 6, 735: 7
-}
 
 class Game {
-    constructor(isWhitesTurn) {
+    constructor(thisPlayersColorIsWhite) {
+        this.thisPlayersColorIsWhite = thisPlayersColorIsWhite // once initialized, this value should never change.
+        // console.log("this player's color is white: " + this.thisPlayersColorIsWhite) 
         this.chessBoard = this.makeStartingBoard() // the actual chessBoard
-        this.isWhitesTurn = isWhitesTurn // boolean
     }
 
     getBoard() {
         return this.chessBoard
     }
 
-    nextPlayersTurn() {
-        this.isWhitesTurn = !this.isWhitesTurn
-    }
+    // nextPlayersTurn() {
+    //     this.isWhitesTurn = !this.isWhitesTurn
+    // }
 
     setBoard(newBoard) {
         this.chessBoard = newBoard
     }
 
-    movePiece(pieceId, to) {
+    movePiece(pieceId, to, isMyMove) {
         /* 
             String, [canvasX, canvasY] => void 
 
@@ -33,6 +33,16 @@ class Game {
             If that piece cannot go to said coord, movePiece 
             should return false. 
         */
+
+  //      console.log(isMyMove)
+
+        const to2D = isMyMove ? {
+            105:0, 195:1, 285: 2, 375: 3, 465: 4, 555: 5, 645: 6, 735: 7
+        } : {
+            105:7, 195:6, 285: 5, 375: 4, 465: 3, 555: 2, 645: 1, 735: 0
+        }
+
+
         var currentBoard = this.getBoard()
         const pieceCoordinates = this.findPiece(currentBoard, pieceId)
         
@@ -97,7 +107,7 @@ class Game {
 
     findPiece(board, pieceId) {
         // ChessBoard, String -> [Int, Int]
-        console.log("piecetofind: " + pieceId)
+      //  console.log("piecetofind: " + pieceId)
         for (var i = 0; i < 8; i++) {
             for (var j = 0; j < 8; j++) {
                 if (board[i][j].getPieceIdOnThisSquare() === pieceId) {
@@ -127,12 +137,13 @@ class Game {
             for (var i = 0; i < 8; i++) {
                 if (j == 0) {
                     // top
-                    startingChessBoard[j][i].setPiece(new ChessPiece(backRank[i], false, "black", blackBackRankId[i]))
-                    startingChessBoard[j + 1][i].setPiece(new ChessPiece("pawn", false, "black", "bp" + i))
+                    // console.log(backRank[i])
+                    startingChessBoard[j][this.thisPlayersColorIsWhite ? i : 7 - i].setPiece(new ChessPiece(backRank[i], false, this.thisPlayersColorIsWhite ? "black" : "white", this.thisPlayersColorIsWhite ? blackBackRankId[i] : whiteBackRankId[i]))
+                    startingChessBoard[j + 1][this.thisPlayersColorIsWhite ? i : 7 - i].setPiece(new ChessPiece("pawn", false, this.thisPlayersColorIsWhite ? "black" : "white", this.thisPlayersColorIsWhite ? "bp" + i : "wp" + i))
                 } else {
                     // bottom
-                    startingChessBoard[j][i].setPiece(new ChessPiece(backRank[i], false, "white", whiteBackRankId[i]))
-                    startingChessBoard[j - 1][i].setPiece(new ChessPiece("pawn", false, "white", "wp" + i))
+                    startingChessBoard[j - 1][this.thisPlayersColorIsWhite ? i : 7 - i].setPiece(new ChessPiece("pawn", false, this.thisPlayersColorIsWhite ? "white" : "black", this.thisPlayersColorIsWhite ? "wp" + i : "bp" + i))
+                    startingChessBoard[j][this.thisPlayersColorIsWhite ? i : 7 - i].setPiece(new ChessPiece(backRank[i], false, this.thisPlayersColorIsWhite ? "white" : "black", this.thisPlayersColorIsWhite ? whiteBackRankId[i] : blackBackRankId[i]))
                 }
             }
         }
@@ -143,6 +154,7 @@ class Game {
                 }
             }
         }
+       // console.log(startingChessBoard)
         return startingChessBoard
     }
 }

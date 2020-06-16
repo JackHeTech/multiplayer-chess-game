@@ -1,54 +1,38 @@
 import React from 'react'
 import Game from '../model/chess'
 import Square from '../model/square'
-import { Stage, Layer, Image } from 'react-konva';
-// import Konva from 'konva';
+import { Stage, Layer } from 'react-konva';
 import Board from '../assets/chessBoard.png'
-import useImage from 'use-image'
 import useSound from 'use-sound'
 import chessMove from '../assets/moveSoundEffect.mp3'
-
-// TODO: update the game state after each move. 
-
-const piecemap = {
-    'pawn': ['https://upload.wikimedia.org/wikipedia/commons/0/04/Chess_plt60.png', 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Chess_pdt60.png'],
-    'knight':['https://upload.wikimedia.org/wikipedia/commons/2/28/Chess_nlt60.png','https://upload.wikimedia.org/wikipedia/commons/f/f1/Chess_ndt60.png'],
-    'bishop':['https://upload.wikimedia.org/wikipedia/commons/9/9b/Chess_blt60.png','https://upload.wikimedia.org/wikipedia/commons/8/81/Chess_bdt60.png'],
-    'king':['https://upload.wikimedia.org/wikipedia/commons/3/3b/Chess_klt60.png','https://upload.wikimedia.org/wikipedia/commons/e/e3/Chess_kdt60.png'],
-    'queen':['https://upload.wikimedia.org/wikipedia/commons/4/49/Chess_qlt60.png','https://upload.wikimedia.org/wikipedia/commons/a/af/Chess_qdt60.png'],
-    'rook':['https://upload.wikimedia.org/wikipedia/commons/5/5c/Chess_rlt60.png','https://upload.wikimedia.org/wikipedia/commons/a/a0/Chess_rdt60.png']
-}
-
-const Piece = (props) => {
-    const choiceOfColor = props.isWhite ? 0 : 1
-    const [image] = useImage(props.imgurls[choiceOfColor]);
-    const isDragged = props.id === props.draggedPieceTargetId
-    // console.log("this piece ID:" + props.thisPieceTargetId)
-    // console.log("dragged piece ID:" + props.draggedPieceTargetId)
-    return <Image image={image}
-         x = {props.x - 90}
-         y = {props.y - 90}
-         draggable 
-         width = {isDragged ? 75 : 60}
-         height = {isDragged ? 75 : 60}
-         onDragStart = {props.onDragStart}
-         onDragEnd = {props.onDragEnd}
-         id = {props.id}
-         />;
-};
-
-
+import socket from '../../connection/socket'
+import Piece from './piece'
+import piecemap from './piecemap'
+import { useParams } from 'react-router-dom'
+import { ColorContext } from '../../context/colorcontext' 
 
 class ChessGame extends React.Component {
 
     state = {
-        gameState: new Game(true),
-        draggedPieceTargetId: "" // empty string means no piece is being dragged
+        gameState: new Game(this.props.color),
+        draggedPieceTargetId: "", // empty string means no piece is being dragged
+        playerTurnToMoveIsWhite: true
     }
 
-    /*
-        Just stick to arrow functions in javascript classes...
-    */
+
+    componentDidMount() {
+        // register event listeners
+        socket.on('opponent move', move => {
+            // move == [pieceId, finalPosition]
+            console.log("opponenet's move: " + move.selectedId + ", " + move.finalPosition)
+            if (move.playerColorThatJustMovedIsWhite !== this.props.color) {
+                this.movePiece(move.selectedId, move.finalPosition, this.state.gameState, false)
+                this.setState({
+                    playerTurnToMoveIsWhite: !move.playerColorThatJustMovedIsWhite
+                })
+            }
+        })
+    }
 
     startDragging = (e) => {
         this.setState({
@@ -56,49 +40,65 @@ class ChessGame extends React.Component {
         })
     }
 
-    endDragging = (e) => {
-        const currentGame = this.state.gameState
-        const currentBoard = currentGame.getBoard()
-        const finalPosition = this.inferCoord(e.target.x() + 90, e.target.y() + 90, currentBoard)
-        const selectedId = this.state.draggedPieceTargetId
 
+    movePiece = (selectedId, finalPosition, currentGame, isMyMove) => {
         /**
          * "update" is the connection between the model and the UI. 
          * This could also be an HTTP request and the "update" could be the server response.
          * (model is hosted on the server instead of the browser)
          */
-        const update = currentGame.movePiece(selectedId, finalPosition)
+        const update = currentGame.movePiece(selectedId, finalPosition, isMyMove)
         
         if (update === "moved in the same position.") {
-            console.log(update)
             this.revertToPreviousState(selectedId) // pass in selected ID to identify the piece that messed up
             return
         } else if (update === "user tried to capture their own piece") {
-            console.log(update)
             this.revertToPreviousState(selectedId) // pass in selected ID to identify the piece that messed up
             return
         } else if (update === "moved to illegal square") { // !!!
-            this.revertToPreviousState(selectedId)
+            this.revertToPreviousState(selectedId) // goes back to previous state
             return
         } else if (update === "player is in check") { // !!!
-            this.revertToPreviousState(selectedId)
+            this.revertToPreviousState(selectedId) // goes back to previous state
             return
         } else if (update === "checkmate") { // !!!
             // ...?
         }
 
-        this.props.playAudio()   
-        currentGame.nextPlayersTurn()
+        // let the server and the other client know your move
+        if (isMyMove) {
+            socket.emit('new move', {
+                nextPlayerColorToMove: !this.state.gameState.thisPlayersColorIsWhite,
+                playerColorThatJustMovedIsWhite: this.state.gameState.thisPlayersColorIsWhite,
+                selectedId: selectedId, 
+                finalPosition: finalPosition,
+                gameId: this.props.gameId
+            })
+        }
         
+
+        this.props.playAudio()   
+        
+        // sets the new game state. 
         this.setState({
             draggedPieceTargetId: "",
             gameState: currentGame,
+            playerTurnToMoveIsWhite: !this.props.color
         })
+    }
+
+
+    endDragging = (e) => {
+        const currentGame = this.state.gameState
+        const currentBoard = currentGame.getBoard()
+        const finalPosition = this.inferCoord(e.target.x() + 90, e.target.y() + 90, currentBoard)
+        const selectedId = this.state.draggedPieceTargetId
+        this.movePiece(selectedId, finalPosition, currentGame, true)
     }
 
     revertToPreviousState = (selectedId) => {
         /**
-         * Should update the UI with what the board looked like before. 
+         * Should update the UI to what the board looked like before. 
          */
         const oldGS = this.state.gameState
         const oldBoard = oldGS.getBoard()
@@ -157,7 +157,7 @@ class ChessGame extends React.Component {
    
     render() {
         // console.log(this.state.gameState.getBoard())
-        
+        console.log("it's white's move this time: " + this.state.playerTurnToMoveIsWhite)
         /*
             Look at the current game state in the model and populate the UI accordingly
         */
@@ -175,8 +175,7 @@ class ChessGame extends React.Component {
                 {this.state.gameState.getBoard().map((row) => {
                         return (<React.Fragment>
                                 {row.map((square) => {
-                                    if (square.isOccupied()) {
-                                        
+                                    if (square.isOccupied()) {                                    
                                         return (
                                             <Piece 
                                                 x = {square.getCanvasCoord()[0]}
@@ -188,6 +187,8 @@ class ChessGame extends React.Component {
                                                 onDragStart = {this.startDragging}
                                                 onDragEnd = {this.endDragging}
                                                 id = {square.getPieceIdOnThisSquare()}
+                                                thisPlayersColorIsWhite = {this.props.color}
+                                                playerTurnToMoveIsWhite = {this.state.playerTurnToMoveIsWhite}
                                                 />
                                         )
                                     }
@@ -203,9 +204,16 @@ class ChessGame extends React.Component {
     }
 }
 
+
+
 const ChessGameWrapper = () => {
+    // get the gameId from the URL here and pass it to the chessGame component as a prop. 
+    const color = React.useContext(ColorContext)
+    const { gameid } = useParams()
     const [play] = useSound(chessMove);
-    return <ChessGame playAudio = {play}/>;
+
+
+    return <ChessGame playAudio = {play} gameId = {gameid} color = {color.didRedirect}/>;
 };
 
 export default ChessGameWrapper

@@ -1,3 +1,4 @@
+import Chess from 'chess.js'
 const ChessPiece = require('./chesspiece')
 const Square = require('./square')
 // when indexing, remember: [y][x]. 
@@ -6,11 +7,26 @@ const Square = require('./square')
  */
 
 
+
+
 class Game {
     constructor(thisPlayersColorIsWhite) {
         this.thisPlayersColorIsWhite = thisPlayersColorIsWhite // once initialized, this value should never change.
         // console.log("this player's color is white: " + this.thisPlayersColorIsWhite) 
         this.chessBoard = this.makeStartingBoard() // the actual chessBoard
+        this.chess = new Chess()
+
+        this.toCoord = thisPlayersColorIsWhite ? {
+            0:8, 1:7, 2: 6, 3: 5, 4: 4, 5: 3, 6: 2, 7: 1
+        } : {
+            0:1, 1:2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8
+        }
+        
+        this.toAlphabet = thisPlayersColorIsWhite ? {
+            0:"a", 1:"b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"
+        } : {
+            0:"h", 1:"g", 2: "f", 3: "e", 4: "d", 5: "c", 6: "b", 7: "a"
+        }
     }
 
     getBoard() {
@@ -26,15 +42,6 @@ class Game {
     }
 
     movePiece(pieceId, to, isMyMove) {
-        /* 
-            String, [canvasX, canvasY] => void 
-
-            should move a selected piece to a specific coord. 
-            If that piece cannot go to said coord, movePiece 
-            should return false. 
-        */
-
-  //      console.log(isMyMove)
 
         const to2D = isMyMove ? {
             105:0, 195:1, 285: 2, 375: 3, 465: 4, 555: 5, 645: 6, 735: 7
@@ -65,44 +72,47 @@ class Game {
             return "moved in the same position."
         }
 
+
+        const moveAttempt = this.chess.move({
+            from: this.toChessMove([x, y], to2D),
+            to: this.toChessMove(to, to2D),
+            piece: pieceId[1]
+        })
+
+        console.log(moveAttempt)
+
+        if (moveAttempt === null) {
+            return "invalid move"
+        }
+
         // Give the new square the piece that was just moved onto it. 
         const reassign = currentBoard[to_y][to_x].setPiece(originalPiece)
 
-        if (reassign != "user tried to capture their own piece") {
+        if (reassign !== "user tried to capture their own piece") {
             // get rid of the piece on the original square.
             currentBoard[y][x].setPiece(null)
         } else {
             return reassign
         }
 
-
-        // update all the pieces on the new board with their new possible moves.
-        const newBoard = this.updateAllPieces(currentBoard)
-
         // update board
-        this.setBoard(newBoard)
-
-        /**
-         * Below just prints a 2D representation
-         * of the current state of the chess
-         * board
-         */ 
-        // for (var i = 0; i < 8; i++) {
-        //     var row = []
-        //     for (var j = 0; j < 8; j++) {
-        //         row.push(currentBoard[i][j].getPieceIdOnThisSquare())
-        //     }       
-        //     console.log(row)
-        // }
+        this.setBoard(currentBoard)
     }
 
 
-    updateAllPieces(board) {
-        /**
-         * Should update all the pieces on the 
-         * given board with their new legal moves. 
-         */
-        return board
+    toChessMove(finalPosition, to2D) {
+      
+
+        let move 
+
+        if (finalPosition[0] > 100) {
+            move = this.toAlphabet[to2D[finalPosition[0]]] + this.toCoord[to2D[finalPosition[1]]]
+        } else {
+            move = this.toAlphabet[finalPosition[0]] + this.toCoord[finalPosition[1]]
+        }
+       
+        console.log("proposed move: " + move)
+        return move
     }
 
     findPiece(board, pieceId) {
@@ -159,4 +169,4 @@ class Game {
     }
 }
 
-module.exports = Game
+export default Game

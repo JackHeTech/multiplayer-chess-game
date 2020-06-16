@@ -53,13 +53,13 @@ class ChessGame extends React.Component {
             this.revertToPreviousState(selectedId) // pass in selected ID to identify the piece that messed up
             return
         } else if (update === "user tried to capture their own piece") {
-            this.revertToPreviousState(selectedId) // pass in selected ID to identify the piece that messed up
+            this.revertToPreviousState(selectedId) 
             return
-        } else if (update === "moved to illegal square") { // !!!
-            this.revertToPreviousState(selectedId) // goes back to previous state
+        } else if (update === "invalid move") {
+            this.revertToPreviousState(selectedId) 
             return
-        } else if (update === "player is in check") { // !!!
-            this.revertToPreviousState(selectedId) // goes back to previous state
+        } else if (update === "player is in check") { 
+            this.revertToPreviousState(selectedId) 
             return
         } else if (update === "checkmate") { // !!!
             // ...?

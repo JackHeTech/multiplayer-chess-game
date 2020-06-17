@@ -34,51 +34,6 @@ class ChessPiece {
     getSquare() {
         return this.squareThisPieceIsOn
     }
-
-
-    generatePossibleSquares(chessBoard) {
-        switch(this.name) {
-            case "pawn":
-                return this.pawn(chessBoard)
-            case "knight":
-                return this.knight(chessBoard)
-            case "bishop":
-                return this.bishop(chessBoard)
-            case "queen":
-                return this.queen(chessBoard)
-            case "king":
-                return this.king(chessBoard)
-            default:
-                return this.rook(chessBoard)
-        }
-    }
-
-    // REQUIRED: call getSquare before calling this method
-    pawn(chessBoard) {
-        const y = this.squareThisPieceIsOn.y
-        const x = this.squareThisPieceIsOn.x
-        this.possibleSquares = pawn(x, y, this.color, chessBoard)
-    }
-
-    knight(chessBoard) {
-        this.possibleSquares = [] // stub
-    }
-
-    king(chessBoard) {
-        this.possibleSquares = [] // stub
-    }
-
-    queen(chessBoard) {
-        this.possibleSquares = [] // stub
-    }
-
-    rook(chessBoard) {
-        this.possibleSquares = [] // stub
-    }
-
-    bishop(chessBoard) {
-        this.possibleSquares = [] // stub
-    }
 }
 
 

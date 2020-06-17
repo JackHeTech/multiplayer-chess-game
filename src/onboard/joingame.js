@@ -32,7 +32,7 @@ const JoinGame = () => {
      */
     const { gameid } = useParams()
     JoinGameRoom(gameid)
-    return <h1>Welcome to Online Multiplayer Chess!</h1>
+    return <h3 style = {{textAlign: "center"}}>Welcome to Online Multiplayer Chess!</h3>
 }
 
 export default JoinGame

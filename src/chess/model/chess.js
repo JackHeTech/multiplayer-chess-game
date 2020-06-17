@@ -72,6 +72,11 @@ class Game {
             return "moved in the same position."
         }
 
+        /**
+         * In order for this method to do anything meaningful, 
+         * the 'reassign const' line of code must run. Therefore, 
+         * for it to run, we must check first that the given move is valid. 
+         */
 
         const moveAttempt = this.chess.move({
             from: this.toChessMove([x, y], to2D),
@@ -79,7 +84,6 @@ class Game {
             piece: pieceId[1]
         })
 
-        console.log(moveAttempt)
 
         if (moveAttempt === null) {
             return "invalid move"
@@ -88,11 +92,24 @@ class Game {
         // Give the new square the piece that was just moved onto it. 
         const reassign = currentBoard[to_y][to_x].setPiece(originalPiece)
 
+
         if (reassign !== "user tried to capture their own piece") {
             // get rid of the piece on the original square.
             currentBoard[y][x].setPiece(null)
         } else {
             return reassign
+        }
+
+        const checkMate = this.chess.in_checkmate() ? " has been checkmated" : " has not been checkmated"
+        console.log(this.chess.turn() + checkMate)
+        if (checkMate === " has been checkmated") {
+            return this.chess.turn() + checkMate
+        }
+        // changes the fill color of the opponent's king that is in check
+        const check = this.chess.in_check() ? " is in check" : " is not in check"
+        console.log(this.chess.turn() + check)
+        if (check === " is in check") {
+            return this.chess.turn() + check
         }
 
         // update board
@@ -111,7 +128,7 @@ class Game {
             move = this.toAlphabet[finalPosition[0]] + this.toCoord[finalPosition[1]]
         }
        
-        console.log("proposed move: " + move)
+       //  console.log("proposed move: " + move)
         return move
     }
 
@@ -157,14 +174,6 @@ class Game {
                 }
             }
         }
-        for (var y = 0; y < 8; y++) {
-            for (var x = 0; x < 8; x++) {
-                if (startingChessBoard[y][x].isOccupied()) {
-                    startingChessBoard[y][x].getPiece().generatePossibleSquares(startingChessBoard) // sets the state of each piece
-                }
-            }
-        }
-       // console.log(startingChessBoard)
         return startingChessBoard
     }
 }

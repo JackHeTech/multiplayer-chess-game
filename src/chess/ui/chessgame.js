@@ -16,7 +16,9 @@ class ChessGame extends React.Component {
     state = {
         gameState: new Game(this.props.color),
         draggedPieceTargetId: "", // empty string means no piece is being dragged
-        playerTurnToMoveIsWhite: true
+        playerTurnToMoveIsWhite: true,
+        whiteKingInCheck: false, 
+        blackKingInCheck: false
     }
 
 
@@ -24,7 +26,7 @@ class ChessGame extends React.Component {
         // register event listeners
         socket.on('opponent move', move => {
             // move == [pieceId, finalPosition]
-            console.log("opponenet's move: " + move.selectedId + ", " + move.finalPosition)
+            // console.log("opponenet's move: " + move.selectedId + ", " + move.finalPosition)
             if (move.playerColorThatJustMovedIsWhite !== this.props.color) {
                 this.movePiece(move.selectedId, move.finalPosition, this.state.gameState, false)
                 this.setState({
@@ -47,6 +49,10 @@ class ChessGame extends React.Component {
          * This could also be an HTTP request and the "update" could be the server response.
          * (model is hosted on the server instead of the browser)
          */
+        var whiteKingInCheck = false 
+        var blackKingInCheck = false
+        var blackCheckmated = false 
+        var whiteCheckmated = false
         const update = currentGame.movePiece(selectedId, finalPosition, isMyMove)
         
         if (update === "moved in the same position.") {
@@ -55,15 +61,24 @@ class ChessGame extends React.Component {
         } else if (update === "user tried to capture their own piece") {
             this.revertToPreviousState(selectedId) 
             return
+        } else if (update === "b is in check" || update === "w is in check") { 
+            // change the fill of the enemy king or your king based on which side is in check. 
+            // play a sound or something
+            if (update[0] === "b") {
+                blackKingInCheck = true
+            } else {
+                whiteKingInCheck = true
+            }
+        } else if (update === "b has been checkmated" || update === "w has been checkmated") { 
+            if (update[0] === "b") {
+                blackCheckmated = true
+            } else {
+                whiteCheckmated = true
+            }
         } else if (update === "invalid move") {
             this.revertToPreviousState(selectedId) 
             return
-        } else if (update === "player is in check") { 
-            this.revertToPreviousState(selectedId) 
-            return
-        } else if (update === "checkmate") { // !!!
-            // ...?
-        }
+        } 
 
         // let the server and the other client know your move
         if (isMyMove) {
@@ -83,8 +98,16 @@ class ChessGame extends React.Component {
         this.setState({
             draggedPieceTargetId: "",
             gameState: currentGame,
-            playerTurnToMoveIsWhite: !this.props.color
+            playerTurnToMoveIsWhite: !this.props.color,
+            whiteKingInCheck: whiteKingInCheck,
+            blackKingInCheck: blackKingInCheck
         })
+
+        if (blackCheckmated) {
+            alert("WHITE WON BY CHECKMATE!")
+        } else if (whiteCheckmated) {
+            alert("BLACK WON BY CHECKMATE!")
+        }
     }
 
 
@@ -151,13 +174,12 @@ class ChessGame extends React.Component {
             }
         }
 
-        // console.log(hashmap)
         return hashmap[shortestDistance]
     }
    
     render() {
         // console.log(this.state.gameState.getBoard())
-        console.log("it's white's move this time: " + this.state.playerTurnToMoveIsWhite)
+       //  console.log("it's white's move this time: " + this.state.playerTurnToMoveIsWhite)
         /*
             Look at the current game state in the model and populate the UI accordingly
         */
@@ -182,13 +204,14 @@ class ChessGame extends React.Component {
                                                 y = {square.getCanvasCoord()[1]} 
                                                 imgurls = {piecemap[square.getPiece().name]}
                                                 isWhite = {square.getPiece().color === "white"}
-                                                thisPieceTargetId = {square.getPiece().targetId}
                                                 draggedPieceTargetId = {this.state.draggedPieceTargetId}
                                                 onDragStart = {this.startDragging}
                                                 onDragEnd = {this.endDragging}
                                                 id = {square.getPieceIdOnThisSquare()}
                                                 thisPlayersColorIsWhite = {this.props.color}
                                                 playerTurnToMoveIsWhite = {this.state.playerTurnToMoveIsWhite}
+                                                whiteKingInCheck = {this.state.whiteKingInCheck}
+                                                blackKingInCheck = {this.state.blackKingInCheck}
                                                 />
                                         )
                                     }
@@ -212,8 +235,24 @@ const ChessGameWrapper = () => {
     const { gameid } = useParams()
     const [play] = useSound(chessMove);
 
+    const [opponentDidJoinTheGame, didJoinGame] = React.useState(false)
+    const [opponentUserName, setUserName] = React.useState('')
 
-    return <ChessGame playAudio = {play} gameId = {gameid} color = {color.didRedirect}/>;
+
+    socket.on('start game', (opponentUserName) => {
+        setUserName(opponentUserName)
+        didJoinGame(true)
+    })
+
+
+    return <React.Fragment>
+        {   
+            opponentDidJoinTheGame ? 
+            <ChessGame playAudio = {play} gameId = {gameid} color = {color.didRedirect}/>
+            :
+            <h1 style = {{textAlign:"center", marginTop:"200px"}}> Waiting for other opponent to join the game... </h1>
+        }
+    </React.Fragment>;
 };
 
 export default ChessGameWrapper

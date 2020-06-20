@@ -84,21 +84,25 @@ class Game {
             piece: pieceId[1]
         })
 
+         console.log(moveAttempt)
 
         if (moveAttempt === null) {
             return "invalid move"
         }
 
-        // Give the new square the piece that was just moved onto it. 
+
+        // ___actually changing the board model___
+
         const reassign = currentBoard[to_y][to_x].setPiece(originalPiece)
 
-
         if (reassign !== "user tried to capture their own piece") {
-            // get rid of the piece on the original square.
             currentBoard[y][x].setPiece(null)
         } else {
             return reassign
         }
+
+        // ___actually changing the board model___
+
 
         const checkMate = this.chess.in_checkmate() ? " has been checkmated" : " has not been checkmated"
         console.log(this.chess.turn() + checkMate)

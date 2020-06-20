@@ -7,16 +7,18 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "chess.js": "^0.10.3",
+    "konva": "6.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-konva": "^16.13.0-3",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
+    "simple-peer": "^9.7.2",
     "socket.io-client": "2.3.0",
+    "styled-components": "^5.1.1",
     "use-image": "^1.0.5",
     "use-sound": "^1.0.2",
-    "uuid": "^7.0.3",
-    "konva": "6.0.0"
+    "uuid": "^7.0.3"
   },
   "scripts": {
     "start": "react-scripts start",

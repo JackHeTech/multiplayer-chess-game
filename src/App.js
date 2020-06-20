@@ -1,10 +1,10 @@
 import React from 'react';
-import ChessGame from './chess/ui/chessgame'
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import JoinRoom from './onboard/joinroom'
+import { ColorContext } from './context/colorcontext'
 import Onboard from './onboard/onboard'
 import JoinGame from './onboard/joingame'
-import { ColorContext } from './context/colorcontext'
-
+import ChessGame from './chess/ui/chessgame'
 /*
  *  Frontend flow: 
  * 
@@ -44,6 +44,8 @@ function App() {
     setDidRedirect(false)
   }, [])
 
+  const [userName, setUserName] = React.useState('')
+
   return (
     // we should render the onboarding screen here. 
     // show user the URL to redirect to. 
@@ -52,11 +54,18 @@ function App() {
       <Router>
         <Switch>
           <Route path = "/" exact>
-            <Onboard />
+            <Onboard setUserName = {setUserName}/>
           </Route>
           <Route path = "/game/:gameid" exact>
-            <JoinGame />
-            <ChessGame />
+            {
+              didRedirect ? 
+              <React.Fragment>
+                    <JoinGame userName = {userName} />
+                    <ChessGame myUserName = {userName} />
+              </React.Fragment> 
+              :
+              <JoinRoom />
+            }
           </Route>
           <Redirect to = "/" />
         </Switch>

@@ -1,4 +1,3 @@
-const pawn = require('./pieces/pawn')
 
 class ChessPiece {
     constructor(name, isAttacked, color, id) {

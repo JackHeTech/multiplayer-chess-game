@@ -7,7 +7,7 @@ import socket from '../connection/socket'
  */
 
 
-const JoinGameRoom = (gameid) => {
+const JoinGameRoom = (gameid, userName) => {
     /**
      * For this browser instance, we want 
      * to join it to a gameRoom. For now
@@ -19,20 +19,20 @@ const JoinGameRoom = (gameid) => {
      */
     const idData = {
         gameId : gameid,
-        userName : ""
+        userName : userName
     }
     socket.emit("playerJoinGame", idData)
 }
   
   
-const JoinGame = () => {
+const JoinGame = (props) => {
     /**
      * Extract the 'gameId' from the URL. 
      * the 'gameId' is the gameRoom ID. 
      */
     const { gameid } = useParams()
-    JoinGameRoom(gameid)
-    return <h3 style = {{textAlign: "center"}}>Welcome to Online Multiplayer Chess!</h3>
+    JoinGameRoom(gameid, props.userName)
+    return <h3 style = {{textAlign: "center"}}>Welcome to Chess with Friend!</h3>
 }
 
 export default JoinGame

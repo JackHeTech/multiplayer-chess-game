@@ -10,6 +10,7 @@ import Piece from './piece'
 import piecemap from './piecemap'
 import { useParams } from 'react-router-dom'
 import { ColorContext } from '../../context/colorcontext' 
+import VideoChatApp from '../../connection/videochat'
 
 class ChessGame extends React.Component {
 
@@ -23,6 +24,8 @@ class ChessGame extends React.Component {
 
 
     componentDidMount() {
+        console.log(this.props.myUserName)
+        console.log(this.props.opponentUserName)
         // register event listeners
         socket.on('opponent move', move => {
             // move == [pieceId, finalPosition]
@@ -187,12 +190,13 @@ class ChessGame extends React.Component {
         
         return (
         <React.Fragment>
+        <h4> Opponent: {this.props.opponentUserName} </h4>
         <div style = {{
             backgroundImage: `url(${Board})`,
             width: "720px",
             height: "720px"}}
         >
-            <Stage width = {1000} height = {1000}>
+            <Stage width = {720} height = {720}>
                 <Layer>
                 {this.state.gameState.getBoard().map((row) => {
                         return (<React.Fragment>
@@ -222,6 +226,7 @@ class ChessGame extends React.Component {
                 </Layer>
             </Stage>
         </div>
+        <h4> You: {this.props.myUserName} </h4>
         </React.Fragment>
         )
     }
@@ -229,7 +234,7 @@ class ChessGame extends React.Component {
 
 
 
-const ChessGameWrapper = () => {
+const ChessGameWrapper = (props) => {
     // get the gameId from the URL here and pass it to the chessGame component as a prop. 
     const color = React.useContext(ColorContext)
     const { gameid } = useParams()
@@ -240,15 +245,41 @@ const ChessGameWrapper = () => {
 
 
     socket.on('start game', (opponentUserName) => {
-        setUserName(opponentUserName)
-        didJoinGame(true)
+        console.log("START!")
+        if (opponentUserName !== props.myUserName) {
+            setUserName(opponentUserName)
+            didJoinGame(true) 
+        } else {
+            // in chessGame, pass opponentUserName as a prop and label it as the enemy. 
+            // in chessGame, use reactContext to get your own userName
+            // socket.emit('myUserName')
+            socket.emit('request username', gameid)
+        }
+    })
+
+
+    socket.on('give userName', (socketId) => {
+        if (socket.id !== socketId) {
+            console.log("give userName stage: " + props.myUserName)
+            socket.emit('recieved userName', {userName: props.myUserName, gameId: gameid})
+        }
+    })
+
+    socket.on('get Opponent UserName', (data) => {
+        if (socket.id !== data.socketId) {
+            setUserName(data.userName)
+            didJoinGame(true) 
+        }
     })
 
 
     return <React.Fragment>
         {   
             opponentDidJoinTheGame ? 
-            <ChessGame playAudio = {play} gameId = {gameid} color = {color.didRedirect}/>
+            <React.Fragment>
+                <ChessGame playAudio = {play} gameId = {gameid} color = {color.didRedirect} myUserName = {props.myUserName} opponentUserName = {opponentUserName} />
+                <VideoChatApp />
+            </React.Fragment>
             :
             <h1 style = {{textAlign:"center", marginTop:"200px"}}> Waiting for other opponent to join the game... </h1>
         }

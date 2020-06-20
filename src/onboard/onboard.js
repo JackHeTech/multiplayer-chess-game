@@ -38,7 +38,7 @@ class CreateNewGame extends React.Component {
 
     typingUserName = () => {
         // grab the input text from the field from the DOM 
-        const typedText = this.textArea.current.value.replace(/\s+/g, '')
+        const typedText = this.textArea.current.value
         
         // set the state with that text
         this.setState({
@@ -77,6 +77,7 @@ class CreateNewGame extends React.Component {
                             // We should send a request to the server to create a new room with
                             // the uuid we generate here.
                             this.props.didRedirect() 
+                            this.props.setUserName(this.state.inputText) 
                             this.setState({
                                 didGetUserName: true
                             })
@@ -89,10 +90,10 @@ class CreateNewGame extends React.Component {
     }
 }
 
-const Onboard = () => {
+const Onboard = (props) => {
     const color = React.useContext(ColorContext)
 
-    return <CreateNewGame didRedirect = {color.playerDidRedirect} />
+    return <CreateNewGame didRedirect = {color.playerDidRedirect} setUserName = {props.setUserName}/>
 }
 
 

@@ -35,7 +35,7 @@ class JoinRoom extends React.Component {
             {
                 this.state.didGetUserName ? 
                 <React.Fragment>
-                    <JoinGame userName = {this.state.inputText}/>
+                    <JoinGame userName = {this.state.inputText} isCreator = {false}/>
                     <ChessGame myUserName = {this.state.inputText}/>
                 </React.Fragment>
             :

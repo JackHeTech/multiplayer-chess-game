@@ -60,7 +60,7 @@ function App() {
             {
               didRedirect ? 
               <React.Fragment>
-                    <JoinGame userName = {userName} />
+                    <JoinGame userName = {userName} isCreator = {true} />
                     <ChessGame myUserName = {userName} />
               </React.Fragment> 
               :

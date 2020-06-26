@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import socket from './socket'
 import Peer from "simple-peer";
 import styled from "styled-components";
+const socket  = require('../connection/socket').socket
+
 
 const Container = styled.div`
   height: 100vh;
@@ -21,9 +22,8 @@ const Video = styled.video`
   height: 50%;
 `;
 
-function VideoChatApp() {
-  const [yourID, setYourID] = useState("");
-  const [users, setUsers] = useState({});
+function VideoChatApp(props) {
+
   const [stream, setStream] = useState();
   const [receivingCall, setReceivingCall] = useState(false);
   const [caller, setCaller] = useState("");
@@ -41,13 +41,6 @@ function VideoChatApp() {
       }
     })
 
-    socket.on("yourID", (id) => {
-      setYourID(id);
-    })
-    socket.on("allUsers", (users) => {
-      setUsers(users);
-    })
-
     socket.on("hey", (data) => {
       setReceivingCall(true);
       setCaller(data.from);
@@ -59,26 +52,11 @@ function VideoChatApp() {
     const peer = new Peer({
       initiator: true,
       trickle: false,
-      config: {
-
-        iceServers: [
-            {
-                urls: "stun:numb.viagenie.ca",
-                username: "sultan1640@gmail.com",
-                credential: "98376683"
-            },
-            {
-                urls: "turn:numb.viagenie.ca",
-                username: "sultan1640@gmail.com",
-                credential: "98376683"
-            }
-        ]
-    },
       stream: stream,
     });
 
     peer.on("signal", data => {
-      socket.emit("callUser", { userToCall: id, signalData: data, from: yourID })
+      socket.emit("callUser", { userToCall: id, signalData: data, from: props.mySocketId})
     })
 
     peer.on("stream", stream => {
@@ -141,16 +119,9 @@ function VideoChatApp() {
         {UserVideo}
         {PartnerVideo}
       </Row>
-      <Row>
-        {Object.keys(users).map(key => {
-          if (key === yourID) {
-            return null;
-          }
-          return (
-            <button onClick={() => callPeer(key)}>Call {key}</button>
-          );
-        })}
-      </Row>
+      <button onClick = {() => {
+        callPeer(props.opponentSocketId)
+      }}>Call Peer</button>
       <Row>
         {incomingCall}
       </Row>

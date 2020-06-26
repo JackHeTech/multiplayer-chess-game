@@ -5,12 +5,13 @@ import { Stage, Layer } from 'react-konva';
 import Board from '../assets/chessBoard.png'
 import useSound from 'use-sound'
 import chessMove from '../assets/moveSoundEffect.mp3'
-import socket from '../../connection/socket'
 import Piece from './piece'
 import piecemap from './piecemap'
 import { useParams } from 'react-router-dom'
 import { ColorContext } from '../../context/colorcontext' 
 import VideoChatApp from '../../connection/videochat'
+const socket  = require('../../connection/socket').socket
+
 
 class ChessGame extends React.Component {
 
@@ -235,14 +236,42 @@ class ChessGame extends React.Component {
 
 
 const ChessGameWrapper = (props) => {
+    /**
+     * player 1
+     *      - socketId 1
+     *      - socketId 2 ???
+     * player 2
+     *      - socketId 2
+     *      - socketId 1
+     */
+
+
+
     // get the gameId from the URL here and pass it to the chessGame component as a prop. 
+    const domainName = 'http://localhost:3000'
     const color = React.useContext(ColorContext)
     const { gameid } = useParams()
     const [play] = useSound(chessMove);
-
+    const [opponentSocketId, setOpponentSocketId] = React.useState('')
     const [opponentDidJoinTheGame, didJoinGame] = React.useState(false)
     const [opponentUserName, setUserName] = React.useState('')
+    const [gameSessionDoesNotExist, doesntExist] = React.useState(false)
 
+    socket.on("playerJoinedRoom", statusUpdate => {
+        console.log("A new player has joined the room! Username: " + statusUpdate.userName + ", Game id: " + statusUpdate.gameId + " Socket id: " + statusUpdate.mySocketId)
+        if (socket.id !== statusUpdate.mySocketId) {
+            setOpponentSocketId(statusUpdate.mySocketId)
+        }
+    })
+
+    socket.on("status", statusUpdate => {
+        console.log(statusUpdate)
+        alert(statusUpdate)
+        if (statusUpdate === 'This game session does not exist.') {
+            doesntExist(true)
+        }
+    })
+    
 
     socket.on('start game', (opponentUserName) => {
         console.log("START!")
@@ -268,22 +297,61 @@ const ChessGameWrapper = (props) => {
     socket.on('get Opponent UserName', (data) => {
         if (socket.id !== data.socketId) {
             setUserName(data.userName)
+            console.log('data.socketId: data.socketId')
+            setOpponentSocketId(data.socketId)
             didJoinGame(true) 
         }
     })
 
 
-    return <React.Fragment>
-        {   
-            opponentDidJoinTheGame ? 
-            <React.Fragment>
-                <ChessGame playAudio = {play} gameId = {gameid} color = {color.didRedirect} myUserName = {props.myUserName} opponentUserName = {opponentUserName} />
-                <VideoChatApp />
-            </React.Fragment>
+    return (
+      <React.Fragment>
+        {opponentDidJoinTheGame ? (
+          <React.Fragment>
+            <ChessGame
+              playAudio={play}
+              gameId={gameid}
+              color={color.didRedirect}
+              myUserName={props.myUserName}
+              opponentUserName={opponentUserName}
+            />
+            <VideoChatApp
+              mySocketId={socket.id}
+              opponentSocketId={opponentSocketId}
+            />
+          </React.Fragment>
+        ) : (
+            gameSessionDoesNotExist ? 
+            <div>
+                <h1 style={{ textAlign: "center", marginTop: "200px" }}>
+                    {" "}
+                    :( {" "}
+                </h1>
+            </div>
             :
-            <h1 style = {{textAlign:"center", marginTop:"200px"}}> Waiting for other opponent to join the game... </h1>
-        }
-    </React.Fragment>;
+          <div>
+            <h1
+              style={{
+                textAlign: "center",
+                marginTop: String(window.innerHeight / 8) + "px",
+              }}
+            >
+              Welcome, {props.myUserName}. Copy and paste the URL below to send
+              to your friend:
+            </h1>
+            <p style={{ textAlign: "center", marginTop: "30" + "px" }}>
+              {domainName + "/game/" + gameid}
+            </p>
+            <br></br>
+
+            <h1 style={{ textAlign: "center", marginTop: "100px" }}>
+              {" "}
+              Waiting for other opponent to join the game...{" "}
+            </h1>
+          </div>
+        )}
+      </React.Fragment>
+    );
 };
 
 export default ChessGameWrapper

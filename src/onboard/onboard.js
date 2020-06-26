@@ -1,8 +1,9 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import uuid from 'uuid/v4'
-import socket from '../connection/socket'
 import { ColorContext } from '../context/colorcontext' 
+const socket  = require('../connection/socket').socket
+
 /**
  * Onboard is where we create the game room.
  */
@@ -48,19 +49,14 @@ class CreateNewGame extends React.Component {
 
     render() {
         // !!! TODO: edit this later once you have bought your own domain. 
-        const domainName = "http://localhost:3000"
 
         return (
             <React.Fragment>
             {
                 this.state.didGetUserName ? 
-                <div>
-                <h3 style={{textAlign: "center", marginTop: String((window.innerHeight / 3)) + "px"}}>1. Hey {this.state.inputText}, copy + paste the URL below to send to your friend:</h3>
-                <p style={{textAlign: "center", marginTop: "30" + "px"}}>{domainName + "/game/" + this.state.gameId}</p>
-                <br></br>
-                <h3 style={{textAlign: "center", marginTop: "125px"}}>2. After you have sent the URL to your friend, click the "Start Game" button:</h3>
-                <Link to = {"/game/" + this.state.gameId}><button className="btn btn-success" style = {{marginLeft: String((window.innerWidth / 2) - 60) + "px", width: "120px"}}>Start Game</button></Link>
-                </div> 
+
+                <Redirect to = {"/game/" + this.state.gameId}><button className="btn btn-success" style = {{marginLeft: String((window.innerWidth / 2) - 60) + "px", width: "120px"}}>Start Game</button></Redirect>
+
             :
                <div>
                     <h1 style={{textAlign: "center", marginTop: String((window.innerHeight / 3)) + "px"}}>Your Username:</h1>

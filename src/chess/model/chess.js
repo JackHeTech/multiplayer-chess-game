@@ -27,6 +27,20 @@ class Game {
         } : {
             0:"h", 1:"g", 2: "f", 3: "e", 4: "d", 5: "c", 6: "b", 7: "a"
         }
+
+        this.toCoord2 = thisPlayersColorIsWhite ? {
+            8:0, 7:1, 6: 2, 5: 3, 4: 4, 3: 5, 2: 6, 1: 7
+        } : {
+            1:0, 2:1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7
+        }
+        
+        this.toAlphabet2 = thisPlayersColorIsWhite ? {
+            "a":0, "b":1, "c":2, "d":3, "e":4, "f":5, "g":6, "h":7
+        } : {
+            "h":0, "g":1, "f":2, "e":3, "d":4, "c":5, "b":6, "a":7
+        }
+
+        this.nQueens = 1
     }
 
     getBoard() {
@@ -78,22 +92,56 @@ class Game {
          * for it to run, we must check first that the given move is valid. 
          */
 
-        const moveAttempt = this.chess.move({
-            from: this.toChessMove([x, y], to2D),
-            to: this.toChessMove(to, to2D),
-            piece: pieceId[1]
-        })
+        const isPromotion = this.isPawnPromotion(to, pieceId[1])
+        const moveAttempt = !isPromotion ? this.chess.move({
+                from: this.toChessMove([x, y], to2D),
+                to: this.toChessMove(to, to2D),
+                piece: pieceId[1]}) 
+            : 
+            this.chess.move({
+                from: this.toChessMove([x, y], to2D),
+                to: this.toChessMove(to, to2D),
+                piece: pieceId[1],
+                promotion: 'q'
+            })
+
 
          console.log(moveAttempt)
+         console.log(isPromotion)
 
         if (moveAttempt === null) {
             return "invalid move"
         }
 
 
+
+        // Check castling
+        const castle = this.isCastle(moveAttempt)
+        if (castle.didCastle) {
+            /**
+             *  The main thing we are doing here is moving the right rook
+             *  to the right position. 
+             * 
+             * - Get original piece by calling getPiece() on the original [x, y]
+             * - Set the new [to_x, to_y] to the original piece
+             * - Set the original [x, y] to null
+             */
+
+            const originalRook = currentBoard[castle.y][castle.x].getPiece()
+            currentBoard[castle.to_y][castle.to_x].setPiece(originalRook)
+            currentBoard[castle.y][castle.x].setPiece(null)
+        }
+
+
         // ___actually changing the board model___
 
-        const reassign = currentBoard[to_y][to_x].setPiece(originalPiece)
+        const reassign = isPromotion ? currentBoard[to_y][to_x].setPiece(
+            new ChessPiece(
+                'queen', 
+                false, 
+                pieceId[0] === 'w' ? 'white' : 'black', 
+                pieceId[0] === 'w' ? 'wq' + this.nQueens : 'bq' + this.nQueens))
+            : currentBoard[to_y][to_x].setPiece(originalPiece)
 
         if (reassign !== "user tried to capture their own piece") {
             currentBoard[y][x].setPiece(null)
@@ -116,14 +164,77 @@ class Game {
             return this.chess.turn() + check
         }
 
+        console.log(currentBoard)
         // update board
         this.setBoard(currentBoard)
     }
 
 
+
+    isCastle(moveAttempt) {
+        /**
+         * Assume moveAttempt is legal. 
+         * 
+         * {moveAttempt} -> {boolean x, y to_x, to_y} 
+         * 
+         * returns if a player has castled, the final position of 
+         * the rook (to_x, to_y), and the original position of the rook (x, y)
+         * 
+         */
+
+
+        const piece = moveAttempt.piece
+        const move = {from: moveAttempt.from, to: moveAttempt.to}
+
+        const isBlackCastle = ((move.from === 'e1' && move.to === 'g1') || (move.from === 'e1' && move.to === 'c1')) 
+        const isWhiteCastle = (move.from === 'e8' && move.to === 'g8') || (move.from === 'e8' && move.to === 'c8')
+        
+
+        if (!(isWhiteCastle || isBlackCastle) || piece !== 'k') {
+            return {
+                didCastle: false
+            }
+        }
+
+        let originalPositionOfRook
+        let newPositionOfRook
+
+        if ((move.from === 'e1' && move.to === 'g1')) {
+            originalPositionOfRook = 'h1'
+            newPositionOfRook = 'f1'
+        } else if ((move.from === 'e1' && move.to === 'c1')) {
+            originalPositionOfRook = 'a1'
+            newPositionOfRook = 'd1'
+        } else if ((move.from === 'e8' && move.to === 'g8')) {
+            originalPositionOfRook = 'h8'
+            newPositionOfRook = 'f8'
+        } else { // e8 to c8
+            originalPositionOfRook = 'a8'
+            newPositionOfRook = 'd8'
+        }   
+
+    
+        return {
+            didCastle: true, 
+            x: this.toAlphabet2[originalPositionOfRook[0]], 
+            y: this.toCoord2[originalPositionOfRook[1]], 
+            to_x: this.toAlphabet2[newPositionOfRook[0]], 
+            to_y: this.toCoord2[newPositionOfRook[1]]
+        }
+    }
+
+
+    isPawnPromotion(to, piece) {
+        const res = piece === 'p' && (to[1] === 105 || to[1] === 735)
+        if (res) {
+            this.nQueens += 1
+        }
+        return res
+    }
+
+
     toChessMove(finalPosition, to2D) {
       
-
         let move 
 
         if (finalPosition[0] > 100) {

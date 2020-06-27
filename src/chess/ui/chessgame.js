@@ -318,6 +318,8 @@ const ChessGameWrapper = (props) => {
             <VideoChatApp
               mySocketId={socket.id}
               opponentSocketId={opponentSocketId}
+              myUserName={props.myUserName}
+              opponentUserName={opponentUserName}
             />
           </React.Fragment>
         ) : (

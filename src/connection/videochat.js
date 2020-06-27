@@ -23,13 +23,26 @@ const Video = styled.video`
 `;
 
 function VideoChatApp(props) {
+  /**
+   * initial state: both player is neutral and have the option to call each other
+   * 
+   * player 1 calls player 2: Player 1 should display: 'Calling {player 2 username},' and the 
+   *                          'CallPeer' button should disappear for Player 1.
+   *                          Player 2 should display '{player 1 username} is calling you' and
+   *                          the 'CallPeer' button for Player 2 should also disappear. 
+   * 
+   * Case 1: player 2 accepts call - the video chat begins and there is no button to end it.
+   * 
+   * Case 2: player 2 ignores player 1 call - nothing happens. Wait until the connection times out. 
+   * 
+   */
 
   const [stream, setStream] = useState();
   const [receivingCall, setReceivingCall] = useState(false);
   const [caller, setCaller] = useState("");
   const [callerSignal, setCallerSignal] = useState();
   const [callAccepted, setCallAccepted] = useState(false);
-
+  const [isCalling, setIsCalling] = useState(false)
   const userVideo = useRef();
   const partnerVideo = useRef();
 
@@ -49,6 +62,7 @@ function VideoChatApp(props) {
   }, []);
 
   function callPeer(id) {
+    setIsCalling(true)
     const peer = new Peer({
       initiator: true,
       trickle: false,
@@ -74,6 +88,7 @@ function VideoChatApp(props) {
 
   function acceptCall() {
     setCallAccepted(true);
+    setIsCalling(false)
     const peer = new Peer({
       initiator: false,
       trickle: false,
@@ -104,27 +119,41 @@ function VideoChatApp(props) {
     );
   }
 
-  let incomingCall;
+  let mainView;
   if (receivingCall) {
-    incomingCall = (
+    mainView = (
       <div>
-        <h1>{caller} is calling you</h1>
+        <h1>{props.opponentUserName} is calling you</h1>
         <button onClick={acceptCall}>Accept</button>
       </div>
     )
+  } else if (isCalling) {
+    mainView = (
+      <div>
+        <h1>Currently calling {props.opponentUserName}</h1>
+      </div>
+    )
+  } else if (callAccepted) {
+    mainView = (
+      <div></div>
+    )
+  } else {
+    mainView = (
+      <button onClick = {() => {
+        callPeer(props.opponentSocketId)
+      }}>Call Peer</button>
+    )
   }
+
+
+
   return (
     <Container>
       <Row>
         {UserVideo}
         {PartnerVideo}
       </Row>
-      <button onClick = {() => {
-        callPeer(props.opponentSocketId)
-      }}>Call Peer</button>
-      <Row>
-        {incomingCall}
-      </Row>
+      {mainView}
     </Container>
   );
 }

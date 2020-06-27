@@ -131,7 +131,7 @@ function VideoChatApp(props) {
     mainView = (
       <button onClick = {() => {
         callPeer(props.opponentSocketId)
-      }}>Call Peer</button>
+      }}>Call your friend and chat while you play!</button>
     )
   }
 

@@ -307,7 +307,7 @@ const ChessGameWrapper = (props) => {
     return (
       <React.Fragment>
         {opponentDidJoinTheGame ? (
-          <React.Fragment>
+          <div style = {{display:"flex"}}>
             <ChessGame
               playAudio={play}
               gameId={gameid}
@@ -321,7 +321,7 @@ const ChessGameWrapper = (props) => {
               myUserName={props.myUserName}
               opponentUserName={opponentUserName}
             />
-          </React.Fragment>
+          </div>
         ) : (
             gameSessionDoesNotExist ? 
             <div>

@@ -7,12 +7,10 @@ const socket  = require('../connection/socket').socket
 const Container = styled.div`
   height: 100vh;
   width: 100%;
-  display: flex;
   flex-direction: column;
 `;
 
 const Row = styled.div`
-  display: flex;
   width: 100%;
 `;
 
@@ -112,15 +110,13 @@ function VideoChatApp(props) {
     );
   }
 
-  let PartnerVideo;
+  let mainView;
+
   if (callAccepted) {
-    PartnerVideo = (
+    mainView = (
       <Video playsInline ref={partnerVideo} autoPlay />
     );
-  }
-
-  let mainView;
-  if (receivingCall) {
+  } else if (receivingCall) {
     mainView = (
       <div>
         <h1>{props.opponentUserName} is calling you</h1>
@@ -132,10 +128,6 @@ function VideoChatApp(props) {
       <div>
         <h1>Currently calling {props.opponentUserName}</h1>
       </div>
-    )
-  } else if (callAccepted) {
-    mainView = (
-      <div></div>
     )
   } else {
     mainView = (
@@ -151,9 +143,8 @@ function VideoChatApp(props) {
     <Container>
       <Row>
         {UserVideo}
-        {PartnerVideo}
+        {mainView}
       </Row>
-      {mainView}
     </Container>
   );
 }

@@ -16,8 +16,6 @@ const Row = styled.div`
 
 const Video = styled.video`
   border: 1px solid blue;
-  width: 50%;
-  height: 50%;
 `;
 
 function VideoChatApp(props) {
@@ -106,7 +104,7 @@ function VideoChatApp(props) {
   let UserVideo;
   if (stream) {
     UserVideo = (
-      <Video playsInline muted ref={userVideo} autoPlay />
+      <Video playsInline muted ref={userVideo} autoPlay style = {{width: "50%", height: "50%"}} />
     );
   }
 
@@ -142,8 +140,8 @@ function VideoChatApp(props) {
   return (
     <Container>
       <Row>
-        {UserVideo}
         {mainView}
+        {UserVideo}
       </Row>
     </Container>
   );

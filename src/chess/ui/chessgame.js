@@ -191,7 +191,6 @@ class ChessGame extends React.Component {
         
         return (
         <React.Fragment>
-        <h4> Opponent: {this.props.opponentUserName} </h4>
         <div style = {{
             backgroundImage: `url(${Board})`,
             width: "720px",
@@ -227,7 +226,6 @@ class ChessGame extends React.Component {
                 </Layer>
             </Stage>
         </div>
-        <h4> You: {this.props.myUserName} </h4>
         </React.Fragment>
         )
     }
@@ -307,20 +305,22 @@ const ChessGameWrapper = (props) => {
     return (
       <React.Fragment>
         {opponentDidJoinTheGame ? (
-          <div style = {{display:"flex"}}>
-            <ChessGame
-              playAudio={play}
-              gameId={gameid}
-              color={color.didRedirect}
-              myUserName={props.myUserName}
-              opponentUserName={opponentUserName}
-            />
-            <VideoChatApp
-              mySocketId={socket.id}
-              opponentSocketId={opponentSocketId}
-              myUserName={props.myUserName}
-              opponentUserName={opponentUserName}
-            />
+          <div>
+          <h4> Opponent: {opponentUserName} </h4>
+            <div style = {{display:"flex"}}>
+                <ChessGame
+                playAudio={play}
+                gameId={gameid}
+                color={color.didRedirect}
+                />
+                <VideoChatApp
+                mySocketId={socket.id}
+                opponentSocketId={opponentSocketId}
+                myUserName={props.myUserName}
+                opponentUserName={opponentUserName}
+                />
+            </div>
+            <h4> You: {props.myUserName} </h4>
           </div>
         ) : (
             gameSessionDoesNotExist ? 

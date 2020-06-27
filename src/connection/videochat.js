@@ -112,26 +112,26 @@ function VideoChatApp(props) {
 
   if (callAccepted) {
     mainView = (
-      <Video playsInline ref={partnerVideo} autoPlay />
+      <Video playsInline ref={partnerVideo} autoPlay style = {{width: "100%", height: "100%"}} />
     );
   } else if (receivingCall) {
     mainView = (
       <div>
         <h1>{props.opponentUserName} is calling you</h1>
-        <button onClick={acceptCall}>Accept</button>
+        <button onClick={acceptCall}><h1>Accept</h1></button>
       </div>
     )
   } else if (isCalling) {
     mainView = (
       <div>
-        <h1>Currently calling {props.opponentUserName}</h1>
+        <h1>Currently calling {props.opponentUserName}...</h1>
       </div>
     )
   } else {
     mainView = (
       <button onClick = {() => {
         callPeer(props.opponentSocketId)
-      }}>Call your friend and chat while you play!</button>
+      }}><h1>Chat with your friend while you play!</h1></button>
     )
   }
 

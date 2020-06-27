@@ -265,7 +265,7 @@ const ChessGameWrapper = (props) => {
     socket.on("status", statusUpdate => {
         console.log(statusUpdate)
         alert(statusUpdate)
-        if (statusUpdate === 'This game session does not exist.') {
+        if (statusUpdate === 'This game session does not exist.' || statusUpdate === 'There are already 2 people playing in this room.') {
             doesntExist(true)
         }
     })
@@ -338,7 +338,7 @@ const ChessGameWrapper = (props) => {
                 marginTop: String(window.innerHeight / 8) + "px",
               }}
             >
-              Welcome, {props.myUserName}. Copy and paste the URL below to send
+              Hey <strong>{props.myUserName}</strong>, Copy and paste the URL below to send
               to your friend:
             </h1>
             <p style={{ textAlign: "center", marginTop: "30" + "px" }}>

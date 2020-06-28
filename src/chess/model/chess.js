@@ -107,10 +107,23 @@ class Game {
 
 
          console.log(moveAttempt)
-         console.log(isPromotion)
+        // console.log(isPromotion)
 
         if (moveAttempt === null) {
             return "invalid move"
+        }
+
+
+        if (moveAttempt.flags === 'e') {
+            const move = moveAttempt.to 
+            const x = this.toAlphabet2[move[0]]
+            let y
+            if (moveAttempt.color === 'w') {
+                y = parseInt(move[1], 10) - 1
+            } else {
+                y = parseInt(move[1], 10) + 1 
+            }
+            currentBoard[this.toCoord2[y]][x].setPiece(null)
         }
 
 

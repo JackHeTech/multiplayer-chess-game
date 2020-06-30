@@ -255,51 +255,53 @@ const ChessGameWrapper = (props) => {
     const [opponentUserName, setUserName] = React.useState('')
     const [gameSessionDoesNotExist, doesntExist] = React.useState(false)
 
-    socket.on("playerJoinedRoom", statusUpdate => {
-        console.log("A new player has joined the room! Username: " + statusUpdate.userName + ", Game id: " + statusUpdate.gameId + " Socket id: " + statusUpdate.mySocketId)
-        if (socket.id !== statusUpdate.mySocketId) {
-            setOpponentSocketId(statusUpdate.mySocketId)
-        }
-    })
-
-    socket.on("status", statusUpdate => {
-        console.log(statusUpdate)
-        alert(statusUpdate)
-        if (statusUpdate === 'This game session does not exist.' || statusUpdate === 'There are already 2 people playing in this room.') {
-            doesntExist(true)
-        }
-    })
+    React.useEffect(() => {
+        socket.on("playerJoinedRoom", statusUpdate => {
+            console.log("A new player has joined the room! Username: " + statusUpdate.userName + ", Game id: " + statusUpdate.gameId + " Socket id: " + statusUpdate.mySocketId)
+            if (socket.id !== statusUpdate.mySocketId) {
+                setOpponentSocketId(statusUpdate.mySocketId)
+            }
+        })
     
-
-    socket.on('start game', (opponentUserName) => {
-        console.log("START!")
-        if (opponentUserName !== props.myUserName) {
-            setUserName(opponentUserName)
-            didJoinGame(true) 
-        } else {
-            // in chessGame, pass opponentUserName as a prop and label it as the enemy. 
-            // in chessGame, use reactContext to get your own userName
-            // socket.emit('myUserName')
-            socket.emit('request username', gameid)
-        }
-    })
-
-
-    socket.on('give userName', (socketId) => {
-        if (socket.id !== socketId) {
-            console.log("give userName stage: " + props.myUserName)
-            socket.emit('recieved userName', {userName: props.myUserName, gameId: gameid})
-        }
-    })
-
-    socket.on('get Opponent UserName', (data) => {
-        if (socket.id !== data.socketId) {
-            setUserName(data.userName)
-            console.log('data.socketId: data.socketId')
-            setOpponentSocketId(data.socketId)
-            didJoinGame(true) 
-        }
-    })
+        socket.on("status", statusUpdate => {
+            console.log(statusUpdate)
+            alert(statusUpdate)
+            if (statusUpdate === 'This game session does not exist.' || statusUpdate === 'There are already 2 people playing in this room.') {
+                doesntExist(true)
+            }
+        })
+        
+    
+        socket.on('start game', (opponentUserName) => {
+            console.log("START!")
+            if (opponentUserName !== props.myUserName) {
+                setUserName(opponentUserName)
+                didJoinGame(true) 
+            } else {
+                // in chessGame, pass opponentUserName as a prop and label it as the enemy. 
+                // in chessGame, use reactContext to get your own userName
+                // socket.emit('myUserName')
+                socket.emit('request username', gameid)
+            }
+        })
+    
+    
+        socket.on('give userName', (socketId) => {
+            if (socket.id !== socketId) {
+                console.log("give userName stage: " + props.myUserName)
+                socket.emit('recieved userName', {userName: props.myUserName, gameId: gameid})
+            }
+        })
+    
+        socket.on('get Opponent UserName', (data) => {
+            if (socket.id !== data.socketId) {
+                setUserName(data.userName)
+                console.log('data.socketId: data.socketId')
+                setOpponentSocketId(data.socketId)
+                didJoinGame(true) 
+            }
+        })
+    }, [])
 
 
     return (

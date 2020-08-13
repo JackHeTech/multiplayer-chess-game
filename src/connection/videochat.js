@@ -137,14 +137,12 @@ function VideoChatApp(props) {
 
 
 
-  return (
-    <Container>
+  return (<Container>
       <Row>
         {mainView}
         {UserVideo}
       </Row>
-    </Container>
-  );
+    </Container>);
 }
 
 export default VideoChatApp;

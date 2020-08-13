@@ -47,9 +47,6 @@ function App() {
   const [userName, setUserName] = React.useState('')
 
   return (
-    // we should render the onboarding screen here. 
-    // show user the URL to redirect to. 
-
     <ColorContext.Provider value = {{didRedirect: didRedirect, playerDidRedirect: playerDidRedirect, playerDidNotRedirect: playerDidNotRedirect}}>
       <Router>
         <Switch>
@@ -57,21 +54,18 @@ function App() {
             <Onboard setUserName = {setUserName}/>
           </Route>
           <Route path = "/game/:gameid" exact>
-            {
-              didRedirect ? 
+            {didRedirect ? 
               <React.Fragment>
                     <JoinGame userName = {userName} isCreator = {true} />
                     <ChessGame myUserName = {userName} />
               </React.Fragment> 
               :
-              <JoinRoom />
-            }
+              <JoinRoom />}
           </Route>
           <Redirect to = "/" />
         </Switch>
       </Router>
-    </ColorContext.Provider>
-  );
+    </ColorContext.Provider>);
 }
 
 export default App;

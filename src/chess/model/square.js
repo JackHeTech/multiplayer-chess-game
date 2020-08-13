@@ -55,4 +55,4 @@ class Square {
     }
 }
 
-module.exports = Square
+export default Square

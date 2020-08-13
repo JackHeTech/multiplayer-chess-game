@@ -50,8 +50,7 @@ class CreateNewGame extends React.Component {
     render() {
         // !!! TODO: edit this later once you have bought your own domain. 
 
-        return (
-            <React.Fragment>
+        return (<React.Fragment>
             {
                 this.state.didGetUserName ? 
 
@@ -81,8 +80,7 @@ class CreateNewGame extends React.Component {
                         }}>Submit</button>
                 </div>
             }
-            </React.Fragment>
-        )
+            </React.Fragment>)
     }
 }
 

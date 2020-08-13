@@ -216,8 +216,7 @@ class ChessGame extends React.Component {
                                                 playerTurnToMoveIsWhite = {this.state.playerTurnToMoveIsWhite}
                                                 whiteKingInCheck = {this.state.whiteKingInCheck}
                                                 blackKingInCheck = {this.state.blackKingInCheck}
-                                                />
-                                        )
+                                                />)
                                     }
                                     return
                                 })}
@@ -226,8 +225,7 @@ class ChessGame extends React.Component {
                 </Layer>
             </Stage>
         </div>
-        </React.Fragment>
-        )
+        </React.Fragment>)
     }
 }
 
@@ -246,7 +244,7 @@ const ChessGameWrapper = (props) => {
 
 
     // get the gameId from the URL here and pass it to the chessGame component as a prop. 
-    const domainName = 'http://localhost:3000'
+    const domainName = 'http://chesswithfriend.com'
     const color = React.useContext(ColorContext)
     const { gameid } = useParams()
     const [play] = useSound(chessMove);
@@ -308,31 +306,27 @@ const ChessGameWrapper = (props) => {
       <React.Fragment>
         {opponentDidJoinTheGame ? (
           <div>
-          <h4> Opponent: {opponentUserName} </h4>
-            <div style = {{display:"flex"}}>
-                <ChessGame
+            <h4> Opponent: {opponentUserName} </h4>
+            <div style={{ display: "flex" }}>
+              <ChessGame
                 playAudio={play}
                 gameId={gameid}
                 color={color.didRedirect}
-                />
-                <VideoChatApp
+              />
+              <VideoChatApp
                 mySocketId={socket.id}
                 opponentSocketId={opponentSocketId}
                 myUserName={props.myUserName}
                 opponentUserName={opponentUserName}
-                />
+              />
             </div>
             <h4> You: {props.myUserName} </h4>
           </div>
+        ) : gameSessionDoesNotExist ? (
+          <div>
+            <h1 style={{ textAlign: "center", marginTop: "200px" }}> :( </h1>
+          </div>
         ) : (
-            gameSessionDoesNotExist ? 
-            <div>
-                <h1 style={{ textAlign: "center", marginTop: "200px" }}>
-                    {" "}
-                    :( {" "}
-                </h1>
-            </div>
-            :
           <div>
             <h1
               style={{
@@ -340,12 +334,18 @@ const ChessGameWrapper = (props) => {
                 marginTop: String(window.innerHeight / 8) + "px",
               }}
             >
-              Hey <strong>{props.myUserName}</strong>, Copy and paste the URL below to send
-              to your friend:
+              Hey <strong>{props.myUserName}</strong>, copy and paste the URL
+              below to send to your friend:
             </h1>
-            <p style={{ textAlign: "center", marginTop: "30" + "px" }}>
-              {domainName + "/game/" + gameid}
-            </p>
+            <textarea
+              style={{ marginLeft: String((window.innerWidth / 2) - 290) + "px", marginTop: "30" + "px", width: "580px", height: "30px"}}
+              onFocus={(event) => {
+                  console.log('sd')
+                  event.target.select()
+              }}
+              value = {domainName + "/game/" + gameid}
+              type = "text">
+              </textarea>
             <br></br>
 
             <h1 style={{ textAlign: "center", marginTop: "100px" }}>

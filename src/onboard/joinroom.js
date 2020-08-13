@@ -30,8 +30,7 @@ class JoinRoom extends React.Component {
 
     render() {
     
-        return (
-            <React.Fragment>
+        return (<React.Fragment>
             {
                 this.state.didGetUserName ? 
                 <React.Fragment>
@@ -59,8 +58,7 @@ class JoinRoom extends React.Component {
                         }}>Submit</button>
                 </div>
             }
-            </React.Fragment>
-        )
+            </React.Fragment>)
     }
 }
 

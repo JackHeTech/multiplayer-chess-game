@@ -36,4 +36,4 @@ class ChessPiece {
 }
 
 
-module.exports = ChessPiece
+export default ChessPiece

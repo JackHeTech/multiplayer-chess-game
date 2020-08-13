@@ -1,6 +1,6 @@
 import Chess from 'chess.js'
-const ChessPiece = require('./chesspiece')
-const Square = require('./square')
+import ChessPiece from './chesspiece'
+import Square from './square'
 // when indexing, remember: [y][x]. 
 /**
  * If the player color is black, make sure to invert the board.

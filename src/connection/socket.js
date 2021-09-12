@@ -1,6 +1,6 @@
 import io from 'socket.io-client'
 
-const URL = 'https://multiplayer-chess-game-app.herokuapp.com/' 
+const URL = 'http://localhost:8000'
 
 const socket = io(URL)
 
